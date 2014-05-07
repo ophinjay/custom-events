@@ -14,7 +14,7 @@ oj.utilities.CustomEvents = (function() {
 
     eventUtility.prototype = (function() {
 
-        var addEventHandler = function(eventName, handler) {
+        var addEventListener = function(eventName, handler) {
             if (!this.isSupported(eventName)) {
                 throwUnsupportedEventException(this, eventName);
             } else if (this.isDelegatedEvent(eventName)) {
@@ -62,7 +62,7 @@ oj.utilities.CustomEvents = (function() {
         }
 
         return {
-            addEventHandler: addEventHandler,
+            addEventListener: addEventListener,
             raiseEvent: raiseEvent,
             isSupported: isSupported,
             isDelegatedEvent: isDelegatedEvent,
@@ -74,10 +74,12 @@ oj.utilities.CustomEvents = (function() {
         eventUtility.call(thatObj);
     };
 
-    var initializeLibrary = function(targetConstructor) {
+    var initializeLibrary = function(targetConstructor, allowedEvents, libraryName) {
         for (var i in eventUtility.prototype) {
             targetConstructor.prototype[i] = eventUtility.prototype[i];
         }
+        targetConstructor.prototype["allowedEvents"] = allowedEvents;
+        targetConstructor.prototype["libName"] = libraryName;
     };
 
     return {

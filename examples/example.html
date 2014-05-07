@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Example for customevents.js</title>
+    <script src="../src/customevents.js"></script>
+    <script src="sample-library.js"></script>
+    <script type="text/javascript">
+    var person = new Person("unnamed");
+    var logs;
+    var personElmt;
+
+    function init() {
+        logs = document.querySelector("[name=logs]");
+        personElmt = document.querySelector("[name=person]");
+        document.querySelector("[name=create]").addEventListener("click", function(eventObject) {
+            person.setName(personElmt.value);
+        });
+        person.addEventListener("on-name-changed", function(eventObject) {
+            logs.value = logs.value + "\nName changed from " + eventObject["oldName"] + " to " + eventObject["newName"];
+        });
+        person.addEventListener("on-name-empty", function(eventObject) {
+            logs.value = logs.value + "\nName is currently empty";
+        });
+    }
+    </script>
+</head>
+
+<body onload="init()">
+    <b>Person Name: </b>
+    <input type="text" name="person" />
+    <button name="create">Create Person</button>
+    <br>
+    <br>
+    <b>Logs</b> 
+    <br>
+    <textarea name="logs" style="width:300px;height:400px"></textarea>
+</body>
+
+</html>
