@@ -30,7 +30,8 @@ Initializing a target module, to raise custom events involves 2 steps as describ
 ### Defining events
 The first step in the initialization procedure is to define events that will be raised by the target module. This is done by invoking the `initializeLibrary()` utility of the `CustomEvents` library with a list of events that the target module wants to raise.
 
-	oj.utilities.CustomEvents.initializeLibrary(<constructor function>, <event configuration>, "<library name>");
+	oj.utilities.CustomEvents.initializeLibrary(<constructor function>, <event configuration>,
+												 "<library name>");
 
 * `<constructor function>` - Reference to the constructor function of the target module. `Person` function in this case.
 * `<event configuration>` - JSON object with names of the custom events as the key and the value as `true`. Eg. `{"event-name-1": true, "event-name-2": true ... }`
@@ -114,4 +115,9 @@ Modified definition for `Person` module after raising events
 	}, "Person");
 
 ## Adding event handlers
+Users of the target module can register events by calling the `addEventListener()` method(added by the library) with the name of the event and the handler function.
 
+	var person = new Person("John");
+	person.addEventListener("on-name-changed", function(eventObject) {
+		console.log("Name changed from " + eventObject.oldName + " to " + eventObject.newName);
+	});
