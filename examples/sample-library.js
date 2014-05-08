@@ -28,6 +28,7 @@ Person.prototype = (function() {
 
 })();
 
+
 oj.utilities.CustomEvents.initializeLibrary(Person, {
     "on-name-changed": true,
     "on-name-empty": true
