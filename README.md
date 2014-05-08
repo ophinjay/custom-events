@@ -121,3 +121,61 @@ Users of the target module can register events by calling the `addEventListener(
 	person.addEventListener("on-name-changed", function(eventObject) {
 		console.log("Name changed from " + eventObject.oldName + " to " + eventObject.newName);
 	});
+
+## Delegating events
+Suppose there is another module `Customer` that holds an object of type `Person`. The `Customer` module has 2 events defined `on-id-changed` and `on-id-empty`.
+
+	var Customer = function(name, id) {
+	    this.id = id;
+	    this.person = new Person(name);
+	    oj.utilities.CustomEvents.initializeObject(this);
+	};
+	
+	Customer.prototype = (function() {
+	    var setId = function(value) {
+	        var oldId = this.id;
+	        this.id = value;
+	        if (value === "") {
+	            this.raiseEvent("on-id-empty");
+	        } else if (oldId !== value) {
+	            this.raiseEvent("on-id-changed", {
+	                "oldId": oldId,
+	                "newId": value
+	            });
+	        }
+	    };
+	
+	    return {
+	    	"setId": setId
+	    };
+	})();
+	
+	oj.utilities.CustomEvents.initializeLibrary(Customer, {
+		"on-id-empty": true,
+		"on-id-changed": true
+	}, "Customer");
+
+Events `on-id-changed` and `on-id-empty` can be now registered on the `Customer` instance. But what if it is required to register events on the `Person` instance of the `Customer` instance? The simplest way would be to access the `person` variable of the `Customer` instance and register events on that object.
+
+	customerInstance.person.addEventListener("on-name-changed", handler);
+
+The disadvantage of this approach is that it the user of the `Customer` library should be aware that every `Customer` instance contains a `person` variable of type `Person`. The `CustomEvents` library provides a simple way to overcome this complication, through the use of delegated events. While defining `Customer` events, the `CustomEvents` library can be notified of the existence of a `Person` object and events that are to be redirected to this object. Modify the `initializeLibrary()` call in the `Customer` module as shown below to redirect the events `on-name-changed` and `on-name-empty` to the `person` object in the `Customer` instance
+
+	oj.utilities.CustomEvents.initializeLibrary(Customer, {
+		"on-id-empty": true,
+		"on-id-changed": true,
+	    "on-name-changed": {
+	    	"delegatedTo": "person"
+	    },
+	    "on-name-empty": {
+	    	"delegatedTo": "person"
+	    }
+	}, "Customer");	
+
+Now users of the `Customer` instance need not register `on-name-changed` event on the person object, they can directly do it with the `Customer` instance
+
+	customerInstance.addEventListener("on-name-changed", handler);
+
+Internally, the library will retrieve the `person` object from the `Customer` instance and register the event on it.
+
+Another advantage of using delegation is that the `Customer` module can restrict events that can be attached to the `person` object.  In the above example, if the `on-name-empty` definition is avoided, users of `Customer` will not be able to register handlers for this event on the `person` object.
