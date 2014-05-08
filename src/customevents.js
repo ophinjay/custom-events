@@ -9,64 +9,61 @@ if (!window["oj"]["utilities"]) {
 oj.utilities.CustomEvents = (function() {
 
     function eventUtility() {
-        this.eventHandlers = {};
+        this.__eventHandlers = {};
     }
 
     eventUtility.prototype = (function() {
 
         var addEventListener = function(eventName, handler) {
-            if (!this.isSupported(eventName)) {
+            if (!isSupported.call(this, eventName)) {
                 throwUnsupportedEventException(this, eventName);
-            } else if (this.isDelegatedEvent(eventName)) {
-                var delegatedToObject = this.getDelegatedToObject(eventName);
+            } else if (isDelegatedEvent.call(this, eventName)) {
+                var delegatedToObject = getDelegatedToObject.call(this, eventName);
                 try {
                     delegatedToObject.addEventListener(eventName, handler);
                 } catch (ex) {
                     throwDelegationFailureException(this, delegatedToObject, eventName);
                 }
             } else {
-                this.eventHandlers[eventName] = this.eventHandlers[eventName] || [];
-                this.eventHandlers[eventName].push(handler);
+                this.__eventHandlers[eventName] = this.__eventHandlers[eventName] || [];
+                this.__eventHandlers[eventName].push(handler);
             }
         };
 
         var raiseEvent = function(eventName, eventObject) {
-            this.eventHandlers[eventName] && this.eventHandlers[eventName].forEach(function(handler) {
+            this.__eventHandlers[eventName] && this.__eventHandlers[eventName].forEach(function(handler) {
                 handler(eventObject);
             });
         };
 
-        var isSupported = function(eventName) {
-            return !this.allowedEvents || this.allowedEvents[eventName];
-        };
+        function isSupported(eventName) {
+            return !this.__allowedEvents || this.__allowedEvents[eventName];
+        }
 
-        var isDelegatedEvent = function(eventName) {
-            var eventObject = this.allowedEvents[eventName];
+        function isDelegatedEvent(eventName) {
+            var eventObject = this.__allowedEvents[eventName];
             return eventObject.constructor === Object && eventObject["delegatedTo"];
-        };
+        }
 
-        var getDelegatedToObject = function(eventName) {
-            if (!this.isDelegatedEvent(eventName)) {
+        function getDelegatedToObject(eventName) {
+            if (!isDelegatedEvent.call(this, eventName)) {
                 throw new Error("'" + eventName + "' is not a delegated event!!!");
             }
-            var delegatedTo = this.allowedEvents[eventName]["delegatedTo"];
+            var delegatedTo = this.__allowedEvents[eventName]["delegatedTo"];
             return delegatedTo.constructor === String ? this[delegatedTo] : delegatedTo;
-        };
+        }
 
         function throwUnsupportedEventException(libObj, eventName) {
-            throw new Error("The event " + eventName + " is not supported by the library" + (libObj.libName.length > 0 ? (" - " + libObj.libName) : "") + "!!!");
+            throw new Error("The event " + eventName + " is not supported by the library" + (libObj.__libName.length > 0 ? (" - " + libObj.__libName) : "") + "!!!");
         }
 
         function throwDelegationFailureException(libObj, delegatedToObj, eventName) {
-            throw new Error("The event '" + eventName + "' delegated from " + libObj.libName + " to " + delegatedToObj.libName + " is not supported by the target libarary!!!");
+            throw new Error("The event '" + eventName + "' delegated from " + libObj.__libName + " to " + delegatedToObj.__libName + " is not supported by the target libarary!!!");
         }
 
         return {
             addEventListener: addEventListener,
-            raiseEvent: raiseEvent,
-            isSupported: isSupported,
-            isDelegatedEvent: isDelegatedEvent,
-            getDelegatedToObject: getDelegatedToObject
+            raiseEvent: raiseEvent
         };
     })();
 
@@ -78,8 +75,8 @@ oj.utilities.CustomEvents = (function() {
         for (var i in eventUtility.prototype) {
             targetConstructor.prototype[i] = eventUtility.prototype[i];
         }
-        targetConstructor.prototype["allowedEvents"] = allowedEvents;
-        targetConstructor.prototype["libName"] = libraryName;
+        targetConstructor.prototype["__allowedEvents"] = allowedEvents;
+        targetConstructor.prototype["__libName"] = libraryName;
     };
 
     return {
