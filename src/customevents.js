@@ -20,7 +20,7 @@ oj.utilities.CustomEvents = (function() {
             } else if (this.isDelegatedEvent(eventName)) {
                 var delegatedToObject = this.getDelegatedToObject(eventName);
                 try {
-                    delegatedToObject.addEventHandler(eventName, handler);
+                    delegatedToObject.addEventListener(eventName, handler);
                 } catch (ex) {
                     throwDelegationFailureException(this, delegatedToObject, eventName);
                 }
@@ -58,7 +58,7 @@ oj.utilities.CustomEvents = (function() {
         }
 
         function throwDelegationFailureException(libObj, delegatedToObj, eventName) {
-            throw new Error("The event '" + eventName + "' delegated from " + libObj.libName + " to " + delegatedToObj.libName + "is not supported by the target libarary!!!");
+            throw new Error("The event '" + eventName + "' delegated from " + libObj.libName + " to " + delegatedToObj.libName + " is not supported by the target libarary!!!");
         }
 
         return {

@@ -6,30 +6,41 @@
     <script src="../src/customevents.js"></script>
     <script src="sample-library.js"></script>
     <script type="text/javascript">
-    var person = new Person("unnamed");
+    var customer = new Customer("unnamed", "noid");
     var logs;
     var personElmt;
 
     function init() {
         logs = document.querySelector("[name=logs]");
-        personElmt = document.querySelector("[name=person]");
-        document.querySelector("[name=create]").addEventListener("click", function(eventObject) {
-            person.setName(personElmt.value);
+	    nameElmt = document.querySelector("[name=name]");
+	    idElmt = document.querySelector("[name=id]");
+        document.querySelector("[name=set]").addEventListener("click", function(eventObject) {
+        	customer.setId(idElmt.value);
+            customer.person.setName(nameElmt.value);
         });
-        person.addEventListener("on-name-changed", function(eventObject) {
+        customer.addEventListener("on-name-changed", function(eventObject) {
             logs.value = logs.value + "\nName changed from " + eventObject["oldName"] + " to " + eventObject["newName"];
         });
-        person.addEventListener("on-name-empty", function(eventObject) {
+        customer.addEventListener("on-name-empty", function(eventObject) {
             logs.value = logs.value + "\nName is currently empty";
+        });
+        customer.addEventListener("on-id-changed", function(eventObject) {
+            logs.value = logs.value + "\nID changed from " + eventObject["oldId"] + " to " + eventObject["newId"];
+        });
+        customer.addEventListener("on-id-empty", function(eventObject) {
+            logs.value = logs.value + "\nID is currently empty";
         });
     }
     </script>
 </head>
 
 <body onload="init()">
-    <b>Person Name: </b>
-    <input type="text" name="person" />
-    <button name="create">Create Person</button>
+    <b>Customer Id: </b>
+    <input type="text" name="id" />
+    <br>
+    <b>Customer Name: </b>
+    <input type="text" name="name" />
+    <button name="set">Set Customer</button>
     <br>
     <br>
     <b>Logs</b> 
